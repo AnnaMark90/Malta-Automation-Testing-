@@ -41,20 +41,25 @@ describe('Modal Download', () => {
         cy.wrap($link).click({ force: true })    
       })
   });
-  it('Camera links appears an image', () => {
+  it('Camera links open image', () => {
     cy.visit('/')
     checkPageDownload()
-    cy.get('a.popup-link').first().click({ force: true })
-    cy.get('.popup.open').should('exist').and('be.visible').within(() => {
-        cy.get('.popup__image img')
-          .should('be.visible')
-          .and(($img) => {
-            expect($img[0].naturalWidth).to.be.greaterThan(0)
-          })
+    cy.get('a.popup-link').each(($link) => {
+      cy.wrap($link).click({ force: true })
+      cy.get('.popup.open', { timeout: 10000 }).should('exist').and('be.visible').within(() => {
+        cy.get('.popup__image img').should('be.visible').and(($img) => {
+          const img = $img[0]
+          expect(img.src).to.match(/^https?:\/\//)
+          expect(img.naturalWidth).to.be.greaterThan(40)
+          expect(img.naturalHeight).to.be.greaterThan(40)
+          expect(img.complete).to.be.true
+        })
+      })
+      cy.get('.popup.open .popup__close').click({ force: true })
     })
   })
   // Camera links show more than 1 photo
-  it('Each camera link opens and closes popup',()=>{ // проверяет только кликабельность кнопки для закрытия 
+  it('Each camera link opens and closes popup',()=>{ 
     cy.visit('/')
     checkPageDownload()
     cy.get('.icon').should('exist')
